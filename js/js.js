@@ -2,7 +2,7 @@
  * Created by Hallur on 29-05-2016.
  */
 var stage, hero;
-var queue, prealoadText;
+var queue, preloadText;
 
 function preload(){
     stage = new createjs.Stage("canvas");
@@ -21,4 +21,8 @@ function loading (e){
     console.log(e.progress);
     preloadText.text = Math.round(e.progress*100) + "%";
     stage.update();
+}
+
+function startGame(){
+    
 }
