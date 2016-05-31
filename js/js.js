@@ -6,8 +6,9 @@ var recycleBinGlass, recycleBinPaper;
 var queue, preloadText;
 var bin = [];
 var garbage = [];
-var amount = 6;
+var amount = 3;
 var pickup = false;
+var roundsComplete = 0;
 
 var speedPowerUp = false;
 
@@ -311,14 +312,24 @@ function checkCollisions() {
             }
         }
 }
+
+function nextLevel (){}
+
 function onTick(e){
     stage.update(e);
     moveHero();
     checkCollisions();
-    windmill1.rotation++;
-    windmill2.rotation++;
-    windmill3.rotation++;
+    if (roundsComplete>1)  {
+        windmill1.rotation++;
+    }
+    if (roundsComplete>2) {
+        windmill2.rotation++;
+    }
+    if (roundsComplete>3) {
+        windmill3.rotation++;
+    }
     if (garbage == 0){
         addGarbage();
+        roundsComplete++;
     }
 }
