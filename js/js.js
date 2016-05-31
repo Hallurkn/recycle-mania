@@ -235,6 +235,7 @@ function moveHero(){
             hero.garbage.y += hero.speed;
         }
     }
+
     // Not move out of top of Canvas
     if (hero.y < 245) {
         hero.y += hero.speed;
@@ -256,7 +257,7 @@ function moveHero(){
         hero.x += hero.speed;
         hero.x = stage.canvas.width + hero.regX;
         if (hero.garbage) {
-            hero.garbage.x += hero.speed;
+            hero.garbage.x = hero.x+20;
         }
     }
     // Not move out of right side of Canvas
@@ -264,7 +265,7 @@ function moveHero(){
         hero.x-=hero.speed;
         hero.x = -hero.regX;
         if (hero.garbage) {
-            hero.garbage.x -= hero.speed;
+            hero.garbage.x = hero.x+20;
         }
     }
 }
