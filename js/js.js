@@ -6,7 +6,7 @@ var recycleBinGlass, recycleBinPaper;
 var queue, preloadText;
 var bin = [];
 var garbage = [];
-var amount = 3;
+var amount = 6;
 var pickup = false;
 
 var speedPowerUp = false;
@@ -34,7 +34,8 @@ function preload(){
         {id:"paperBin", src:"img/green_bin.png"},
         {id:"glassBin", src:"img/blue_bin.png"},
         {id:"windmill", src:"img/mill_rotate.png"},
-        {id:"glass", src:"img/glass.png"}
+        {id:"glass", src:"img/glass.png"},
+        {id:"paper", src:"img/paper.png"}
     ])
 }
 
@@ -120,17 +121,48 @@ function addGarbage() {
         var glass = new createjs.Bitmap(queue.getResult("glass"));
         glass.height = 52;
         glass.width = 17;
-        glass.rotation = 45;
+        glass.regX = glass.width/2;
+        glass.regY = glass.height/2;
         glass.x = 300+Math.floor(Math.random()*20);
         glass.y = 350+Math.floor(Math.random()*20);
         glass.type = "glass";
         glass.touching = false;
 
-        stage.addChild(glass);
-        garbage.push(glass);
-    }
 
+        var paper = new createjs.Bitmap(queue.getResult("paper"));
+        paper.height = 49;
+        paper.width = 49;
+        paper.regX = paper.width/2;
+        paper.regY = paper.height/2;
+        paper.x = 400+Math.floor(Math.random()*20);
+        paper.y = 320+Math.floor(Math.random()*20);
+        paper.type = "paper";
+        paper.touching = false;
+
+        var random = Math.floor(Math.random()*2);
+
+        switch (random) {
+            case 0:
+                stage.addChild(glass);
+                garbage.push(glass);
+                animateGarbage(garbage[i]);
+                break;
+            case 1:
+                stage.addChild(paper);
+                garbage.push(paper);
+                animateGarbage(garbage[i]);
+                break;
+        }
+    }
     amount+=3;
+}
+
+function animateGarbage(thing){
+    for (var i = 0; i<amount; i++) {
+        thing.y = -100 * i;
+        createjs.Tween.get(thing)
+            .to({y: Math.floor(Math.random() * 255 + 245), x: Math.floor(Math.random() * 450), rotation: Math.floor(Math.random() * 2000)}, 2000, createjs.circOut);
+    }
 }
 
 function fingerUp(e){
@@ -204,27 +236,38 @@ function moveHero(){
         }
     }
     // Not move out of top of Canvas
-    if (hero.y < 220) {
+    if (hero.y < 245) {
         hero.y += hero.speed;
-        hero.y = 220;
+        hero.y = 245;
+        if (hero.garbage) {
+            hero.garbage.y += hero.speed;
+        }
     }
     // Not move out of bottom of Canvas
     if (hero.y+hero.height/2 > stage.canvas.height) {
         hero.y-=hero.speed;
         hero.y = stage.canvas.height - hero.regY;
+        if (hero.garbage) {
+            hero.garbage.y -= hero.speed;
+        }
     }
     // Not move out of left side of Canvas
-    if (hero.x < 0 + hero.width/2) {
+    if (hero.x < 0 - hero.width/2) {
         hero.x += hero.speed;
-        hero.x = hero.regX;
+        hero.x = stage.canvas.width + hero.regX;
+        if (hero.garbage) {
+            hero.garbage.x += hero.speed;
+        }
     }
     // Not move out of right side of Canvas
-    if (hero.x+hero.width/2 > stage.canvas.width) {
+    if (hero.x-hero.width/2 > stage.canvas.width) {
         hero.x-=hero.speed;
-        hero.x = stage.canvas.width - hero.regX;
+        hero.x = -hero.regX;
+        if (hero.garbage) {
+            hero.garbage.x -= hero.speed;
+        }
     }
 }
-
 function hitTest(rect1,rect2) {
     if ( rect1.x >= rect2.x + rect2.width
         || rect1.x + rect1.width <= rect2.x
@@ -235,7 +278,6 @@ function hitTest(rect1,rect2) {
     }
     return true;
 }
-
 function checkCollisions() {
 
         for(var i=0;i<bin.length;i++) {
@@ -251,6 +293,10 @@ function checkCollisions() {
                 stage.removeChild(hero.garbage);
                 hero.garbage=null;
                 pickup=false;
+            }
+            if (bin[i].touching && hero.garbage && keys.spacekd && hero.garbage.type != bin[i].type){
+                //ALERT
+                console.log("wrong bin");
             }
         }
         if (keys.spacekd && !pickup) {
