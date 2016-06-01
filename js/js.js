@@ -2,7 +2,7 @@
  * Created by Hallur on 29-05-2016.
  */
 var stage, hero, background, windmill1, windmill2, windmill3;
-var recycleBinGlass, recycleBinPaper;
+var recycleBinGlass, recycleBinPaper, recycleBinCompost;
 var queue, preloadText;
 var bin = [];
 var garbage = [];
@@ -34,9 +34,11 @@ function preload(){
         {id:"background", src:"img/background.png"},
         {id:"paperBin", src:"img/green_bin.png"},
         {id:"glassBin", src:"img/blue_bin.png"},
+        {id:"compostBin", src:"img/red_bin.png"},
         {id:"windmill", src:"img/mill_rotate.png"},
         {id:"glass", src:"img/glass.png"},
-        {id:"paper", src:"img/paper.png"}
+        {id:"paper", src:"img/paper.png"},
+        {id:"compost", src:"img/compost.png"}
     ])
 }
 
@@ -58,7 +60,7 @@ function startGame(){
     windmill1.height = 63;
     windmill1.regX = windmill1.width/2;
     windmill1.regY = 41;
-    windmill1.x = 107;
+    windmill1.x = 106;
     windmill1.y = 130;
 
     windmill2 = new createjs.Bitmap(queue.getResult("windmill"));
@@ -66,7 +68,7 @@ function startGame(){
     windmill2.height = 63;
     windmill2.regX = windmill2.width/2;
     windmill2.regY = 41;
-    windmill2.x = 202;
+    windmill2.x = 200;
     windmill2.y = 116;
 
     windmill3 = new createjs.Bitmap(queue.getResult("windmill"));
@@ -74,7 +76,7 @@ function startGame(){
     windmill3.height = 63;
     windmill3.regX = windmill3.width/2;
     windmill3.regY = 41;
-    windmill3.x = 297;
+    windmill3.x = 296;
     windmill3.y = 126;
 
     hero = new createjs.Shape();
@@ -89,6 +91,18 @@ function startGame(){
     hero.speed = 5;
     hero.garbage=null;
     hero.pickup=false;
+
+    /*function createBin(name, type, width, height, x, y){
+         name = new createjs.Bitmap(queue.getResult(name + "Bin"));
+         name.width = width;
+         name.height = height;
+         name.regX = name.width/2;
+         name.regY = name.height/2;
+         name.x = x;
+         name.y = y;
+         name.type = type;
+         name.touching = false;
+    };*/
 
     recycleBinPaper = new createjs.Bitmap(queue.getResult("paperBin"));
     recycleBinPaper.width = 53;
@@ -110,8 +124,20 @@ function startGame(){
     recycleBinGlass.type = "glass";
     recycleBinGlass.touching = false;
 
-    bin.push(recycleBinGlass, recycleBinPaper);
-    stage.addChild(background, windmill1, windmill2, windmill3, recycleBinGlass, recycleBinPaper, hero);
+    recycleBinCompost = new createjs.Bitmap(queue.getResult("compostBin"));
+    recycleBinCompost.width = 53;
+    recycleBinCompost.height = 68;
+    recycleBinCompost.regX = recycleBinCompost.width/2;
+    recycleBinCompost.regY = recycleBinCompost.height/2;
+    recycleBinCompost.x = 430;
+    recycleBinCompost.y = 280;
+    recycleBinCompost.type = "compost";
+    recycleBinCompost.touching = false;
+
+    
+
+    bin.push(recycleBinGlass, recycleBinPaper, recycleBinCompost);
+    stage.addChild(background, windmill1, windmill2, windmill3, recycleBinGlass, recycleBinPaper, recycleBinCompost, hero);
 
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener('tick', onTick);
@@ -140,7 +166,23 @@ function addGarbage() {
         paper.type = "paper";
         paper.touching = false;
 
-        var random = Math.floor(Math.random()*2);
+        var compost = new createjs.Bitmap(queue.getResult("compost"));
+        compost.height = 49;
+        compost.width = 49;
+        compost.regX = compost.width/2;
+        compost.regY = compost.height/2;
+        compost.x = 400+Math.floor(Math.random()*20);
+        compost.y = 320+Math.floor(Math.random()*20);
+        compost.type = "compost";
+        compost.touching = false;
+
+
+
+        var random = Math.floor(Math.random()*3);
+
+        /*if (something){
+            random = something else
+        }*/
 
         switch (random) {
             case 0:
@@ -151,6 +193,11 @@ function addGarbage() {
             case 1:
                 stage.addChild(paper);
                 garbage.push(paper);
+                animateGarbage(garbage[i]);
+                break;
+            case 2:
+                stage.addChild(compost);
+                garbage.push(compost);
                 animateGarbage(garbage[i]);
                 break;
         }
