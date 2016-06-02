@@ -1,16 +1,23 @@
 /**
  * Created by Hallur on 29-05-2016.
  */
-var stage, hero, background, windmill1, windmill2, windmill3;
-var recycleBinGlass, recycleBinPaper, recycleBinCompost;
+var stage, hero, background, windmill1, windmill2, windmill3, cloud1, cloud2, cloud3, sun, splash, firstSplash, congratsText;
+var sound;
+var nextLevel;
 var queue, preloadText;
 var bin = [];
 var garbage = [];
 var amount = 3;
 var pickup = false;
-var roundsComplete = 0;
+var roundsComplete = -1;
+var mistakes = 0;
+var lives = 3;
+var clicked = false;
+var level = 1;
+var gameRunning = false;
+var done=true;
 
-var speedPowerUp = false;
+//var speedPowerUp = false; For future use
 
 var keys = {
     shiftkd:false,
@@ -28,7 +35,7 @@ function preload(){
     queue = new createjs.LoadQueue(true);
     queue.installPlugin(createjs.Sound);
     queue.on('progress', loading);
-    queue.on('complete', startGame);
+    queue.on('complete', splashScreen);
 
     queue.loadManifest([
         {id:"background", src:"img/background.png"},
@@ -36,24 +43,72 @@ function preload(){
         {id:"glassBin", src:"img/blue_bin.png"},
         {id:"compostBin", src:"img/red_bin.png"},
         {id:"windmill", src:"img/mill_rotate.png"},
+        {id:"cloud", src:"img/cloud.png"},
         {id:"glass", src:"img/glass.png"},
         {id:"paper", src:"img/paper.png"},
-        {id:"compost", src:"img/compost.png"}
+        {id:"compost", src:"img/compost.png"},
+        {id:"unmuted", src:"img/unmuted.png"},
+        {id:"muted", src:"img/muted.png"},
+        {id:"firstSplash", src:"img/splash_one.png"},
+        {id:"splash", src:"img/splash.png"},
+        {id:"nextLevel", src:"img/nextLevel.png"},
+        {id:"heroSS", src:"js/sprite.json"},
+        {id:"fallingSound", src:"sound/falling.wav"},
+        {id:"winSound", src:"sound/win.wav"},
+        {id:"loseSound", src:"sound/lose.wav"},
+        {id:"wrongSound", src:"sound/wrong.wav"},
+        {id:"paperSound", src:"sound/garbage.wav"},
+        {id:"parkSound", src:"sound/park.wav"},
+        {id:"windmillSound", src:"sound/windmill.wav"}
     ])
 }
-
 function loading (e){
     console.log(e.progress);
     preloadText.text = Math.round(e.progress*100) + "%";
     stage.update();
 }
-
-function startGame(){
+//Should rewrite this, DRY
+function switchSound(){
+    if (clicked) {
+        sound.removeEventListener('click', switchSound);
+        stage.removeChild(sound);
+    }
+    unmuteSounds();
+    clicked = true;
+    sound = new createjs.Bitmap(queue.getResult("unmuted"));
+    sound.x = stage.canvas.width - 28;
+    stage.addChild(sound);
+    sound.addEventListener('click', otherSound);
+}
+function muteSounds(){
+    createjs.Sound.setMute("parkSound");
+    createjs.Sound.setMute("fallingSound");
+    createjs.Sound.setMute("paperSound");
+    createjs.Sound.setMute("wrongSound");
+    createjs.Sound.setMute("winSound");
+    createjs.Sound.setMute("loseSound");
+}
+function unmuteSounds(){
+    //FILL IN SOUND ON
+}
+function otherSound() {
+    sound.removeEventListener('click', otherSound);
+    stage.removeChild(sound);
+    muteSounds();
+    sound = new createjs.Bitmap(queue.getResult("muted"));
+    sound.x = stage.canvas.width - 28;
+    stage.addChild(sound);
+    sound.addEventListener('click', switchSound);
+}
+function splashScreen(){
     stage.removeChild(preloadText);
     window.addEventListener('keydown', fingerDown);
     window.addEventListener('keyup', fingerUp);
+    createjs.Sound.play("parkSound", {loop:-1});
 
     background = new createjs.Bitmap(queue.getResult("background"));
+
+    switchSound();
 
     windmill1 = new createjs.Bitmap(queue.getResult("windmill"));
     windmill1.width = 71;
@@ -79,10 +134,10 @@ function startGame(){
     windmill3.x = 296;
     windmill3.y = 126;
 
-    hero = new createjs.Shape();
-    hero.graphics.beginFill("#ff0000").drawRect(0, 0, 40, 90);
-    hero.width = 40;
-    hero.height = 90;
+    var heroSpriteSheet = new createjs.SpriteSheet(queue.getResult("heroSS"));
+    hero = new createjs.Sprite(heroSpriteSheet, 'standRight');
+    hero.width = 33;
+    hero.height = 45;
     hero.regX = hero.width/2;
     hero.regY = hero.height/2;
     hero.x = 20;
@@ -92,57 +147,99 @@ function startGame(){
     hero.garbage=null;
     hero.pickup=false;
 
-    /*function createBin(name, type, width, height, x, y){
-         name = new createjs.Bitmap(queue.getResult(name + "Bin"));
-         name.width = width;
-         name.height = height;
-         name.regX = name.width/2;
-         name.regY = name.height/2;
-         name.x = x;
-         name.y = y;
-         name.type = type;
-         name.touching = false;
-    };*/
+    cloud1 = new createjs.Bitmap(queue.getResult('cloud'));
+    cloud1.x = 200;
+    cloud1.y = 10;
 
-    recycleBinPaper = new createjs.Bitmap(queue.getResult("paperBin"));
-    recycleBinPaper.width = 53;
-    recycleBinPaper.height = 68;
-    recycleBinPaper.regX = recycleBinPaper.width/2;
-    recycleBinPaper.regY = recycleBinPaper.height/2;
-    recycleBinPaper.x = 600;
-    recycleBinPaper.y = 430;
-    recycleBinPaper.type = "paper";
-    recycleBinPaper.touching = false;
+    cloud2 = new createjs.Bitmap(queue.getResult('cloud'));
+    cloud2.x = 500;
+    cloud2.y = 20;
 
-    recycleBinGlass = new createjs.Bitmap(queue.getResult("glassBin"));
-    recycleBinGlass.width = 53;
-    recycleBinGlass.height = 68;
-    recycleBinGlass.regX = recycleBinGlass.width/2;
-    recycleBinGlass.regY = recycleBinGlass.height/2;
-    recycleBinGlass.x = 600;
-    recycleBinGlass.y = 280;
-    recycleBinGlass.type = "glass";
-    recycleBinGlass.touching = false;
+    cloud3 = new createjs.Bitmap(queue.getResult('cloud'));
+    cloud3.x = 20;
+    cloud3.y = 20;
 
-    recycleBinCompost = new createjs.Bitmap(queue.getResult("compostBin"));
-    recycleBinCompost.width = 53;
-    recycleBinCompost.height = 68;
-    recycleBinCompost.regX = recycleBinCompost.width/2;
-    recycleBinCompost.regY = recycleBinCompost.height/2;
-    recycleBinCompost.x = 430;
-    recycleBinCompost.y = 280;
-    recycleBinCompost.type = "compost";
-    recycleBinCompost.touching = false;
+    sun = new createjs.Shape();
+    sun.graphics.beginFill("#FCEF00").drawCircle(0,0,40);
+    sun.x = 550;
+    sun.y = 40;
 
-    
+    splash = new createjs.Bitmap(queue.getResult('splash'));
+    splash.alpha = 1;
+    splash.addEventListener('click', startLevel);
 
-    bin.push(recycleBinGlass, recycleBinPaper, recycleBinCompost);
-    stage.addChild(background, windmill1, windmill2, windmill3, recycleBinGlass, recycleBinPaper, recycleBinCompost, hero);
+    firstSplash = new createjs.Bitmap(queue.getResult('firstSplash'));
+    firstSplash.alpha=1;
+    firstSplash.addEventListener('click', function(){
+        firstSplash.removeEventListener('click');
+        stage.removeChild(firstSplash);
+        stage.addChild(splash);
+        stage.update();
+    });
 
-    createjs.Ticker.setFPS(60);
-    createjs.Ticker.addEventListener('tick', onTick);
+    stage.addChild(background, sun, cloud1, cloud2, cloud3, windmill1, windmill2, windmill3, firstSplash, sound);
+    stage.update();
 }
+function moveCloud (cloud, xValue, time){
+    createjs.Tween.get(cloud)
+        .to({x:xValue}, time, createjs.Ease.circIn)
+}
+function startLevel (){
+    gameRunning = true;
+    if (level == 1){
+    createjs.Tween.get(splash)
+        .to({alpha:0}, 0, createjs.Ease.circOut).call(function() {
+        splash.removeEventListener('click', startLevel);
+        })
+    }
 
+        //instructions for each level needed
+
+        if (level > 1) {
+            nextLevel.removeEventListener('click', startLevel);
+            stage.removeChild(nextLevel, congratsText);
+            hero.x = 20;
+            hero.y = 400;
+            cloud1.x = 200;
+            cloud1.y = 10;
+            cloud2.x = 500;
+            cloud2.y = 20;
+            cloud3.x = 20;
+            cloud3.y = 20;
+        }
+
+        bin.push(createBin('paperBin', 'paper', 53, 68, 600, 450));
+        bin.push(createBin('glassBin', 'glass', 53, 68, 600, 260));
+        mistakesText = new createjs.Text("Mistakes made: " + mistakes, "30px monospace", "#fff");
+        stage.addChild(mistakesText);
+        livesText = new createjs.Text("Lives: " + lives, "30px monospace", "#fff");
+        stage.addChild(livesText);
+        livesText.y = 30;
+        levelText = new createjs.Text("Current Level: " + level, "30px monospace", "#fff");
+        stage.addChild(levelText);
+        levelText.y = 60;
+
+        wrongBin = new createjs.Text("WRONG BIN, +1 MISTAKE", "15px monospace", "#f00");
+
+        stage.addChild(hero);
+
+        createjs.Ticker.setFPS(60);
+        createjs.Ticker.addEventListener('tick', onTick);
+        stage.update();
+}
+function createBin(name, type, width, height, x, y){
+    var name = new createjs.Bitmap(queue.getResult(name));
+    name.width = width;
+    name.height = height;
+    name.regX = name.width/2;
+    name.regY = name.height/2;
+    name.x = x;
+    name.y = y;
+    name.type = type;
+    name.touching = false;
+    stage.addChild(name);
+    return name;
+}
 function addGarbage() {
     for (var i = 0; i < amount; i++) {
         var glass = new createjs.Bitmap(queue.getResult("glass"));
@@ -154,7 +251,6 @@ function addGarbage() {
         glass.y = 350+Math.floor(Math.random()*20);
         glass.type = "glass";
         glass.touching = false;
-
 
         var paper = new createjs.Bitmap(queue.getResult("paper"));
         paper.height = 49;
@@ -176,43 +272,50 @@ function addGarbage() {
         compost.type = "compost";
         compost.touching = false;
 
+        var random = Math.floor(Math.random()*2);
 
-
-        var random = Math.floor(Math.random()*3);
-
-        /*if (something){
-            random = something else
-        }*/
+        if (level > 1) {
+            bin.push(createBin('compostBin', 'compost', 53, 68, 430, 260));
+            random = Math.floor(Math.random()*3);
+        }
 
         switch (random) {
             case 0:
                 stage.addChild(glass);
                 garbage.push(glass);
-                animateGarbage(garbage[i]);
+                animateGarbage(garbage[i], i);
+                garbage[i].dangerous = true;
                 break;
             case 1:
                 stage.addChild(paper);
                 garbage.push(paper);
-                animateGarbage(garbage[i]);
+                animateGarbage(garbage[i], i);
+                garbage[i].dangerous = true;
                 break;
             case 2:
                 stage.addChild(compost);
                 garbage.push(compost);
-                animateGarbage(garbage[i]);
+                animateGarbage(garbage[i], i);
+                garbage[i].dangerous = true;
                 break;
         }
     }
-    amount+=3;
+    amount+=level;
 }
 
-function animateGarbage(thing){
-    for (var i = 0; i<amount; i++) {
-        thing.y = -100 * i;
-        createjs.Tween.get(thing)
-            .to({y: Math.floor(Math.random() * 255 + 245), x: Math.floor(Math.random() * 450), rotation: Math.floor(Math.random() * 2000)}, 2000, createjs.circOut);
-    }
-}
+function animateGarbage(garbage, index){
+        pickup=true;
+        garbage.y = -100;
+        createjs.Tween.get(garbage).wait(300*index)
+            .wait(300).to({y: Math.floor(Math.random() * 255 + 245),
+                x: Math.floor(Math.random() * 450),
+                rotation: Math.floor(Math.random() * 2000)}, 1500, createjs.circOut).call(function(){
+            pickup=false;
+            createjs.Sound.play("fallingSound");
+            garbage.dangerous = false;
+        });
 
+}
 function fingerUp(e){
     if(e.keyCode===16){
         keys.shiftkd=false;
@@ -222,19 +325,23 @@ function fingerUp(e){
     }
     if(e.keyCode===37){
         keys.lkd=false;
+        hero.gotoAndStop("left");
     }
     if(e.keyCode===38){
         keys.ukd=false;
+        hero.gotoAndStop("up");
     }
     if(e.keyCode===39){
         keys.rkd=false;
+        hero.gotoAndStop("standRight");
     }
     if(e.keyCode===40){
         keys.dkd=false;
+        hero.gotoAndStop("down");
     }
 }
 function fingerDown(e){
-    if(e.keyCode===16 || speedPowerUp){
+    if(e.keyCode===16){
         keys.shiftkd=true;
     }
     if(e.keyCode===32){
@@ -242,15 +349,19 @@ function fingerDown(e){
     }
     if(e.keyCode===37){
         keys.lkd=true;
+        hero.gotoAndPlay("left");
     }
     if(e.keyCode===38){
         keys.ukd=true;
+        hero.gotoAndPlay("up");
     }
     if(e.keyCode===39){
         keys.rkd=true;
+        hero.gotoAndPlay("right");
     }
     if(e.keyCode===40){
         keys.dkd=true;
+        hero.gotoAndPlay("down");
     }
 }
 function moveHero(){
@@ -267,6 +378,7 @@ function moveHero(){
     }
     if(keys.lkd){
         hero.x-=hero.speed;
+
         if (hero.garbage) {
             hero.garbage.x -= hero.speed;
         }
@@ -328,7 +440,6 @@ function hitTest(rect1,rect2) {
     return true;
 }
 function checkCollisions() {
-
         for(var i=0;i<bin.length;i++) {
             if (hitTest(hero, bin[i])) {
                 bin[i].touching = true;
@@ -339,13 +450,22 @@ function checkCollisions() {
             if (bin[i].touching && hero.garbage && keys.spacekd && hero.garbage.type == bin[i].type){
                 var index = garbage.indexOf(hero.garbage);
                 garbage.splice(index,1);
+                createjs.Sound.play("paperSound");
                 stage.removeChild(hero.garbage);
                 hero.garbage=null;
                 pickup=false;
             }
             if (bin[i].touching && hero.garbage && keys.spacekd && hero.garbage.type != bin[i].type){
-                //ALERT
+                var index = garbage.indexOf(hero.garbage);
+                garbage.splice(index,1);
+                createjs.Sound.play("wrongSound"); //needs to be fixed, only works when touching
+                stage.removeChild(hero.garbage);
+                hero.garbage=null;
+                pickup=false;
                 console.log("wrong bin");
+                stage.addChild(wrongBin);
+                blinkObject(wrongBin);
+                mistakes++;
             }
         }
         if (keys.spacekd && !pickup) {
@@ -353,30 +473,112 @@ function checkCollisions() {
                 if (hitTest(hero, garbage[i])) {
                     hero.garbage=garbage[i];
                     garbage[i].x = hero.x + 20;
-                    garbage[i].y = hero.y - 40;
+                    garbage[i].y = hero.y - 10;
                     pickup=true;
                 }
             }
         }
+
+        for (var i = 0; i < garbage.length; i++) {
+            if (hitTest(hero, garbage[i]) && garbage[i].dangerous) {
+                garbage[i].dangerous = false;
+                blinkObject(hero);
+                lives--;
+            }
+        }
 }
+function blinkObject(object){
+    createjs.Tween.get(object)
+        .to({alpha:0.5}, 100, createjs.Ease.linear).wait(200)
+        .to({alpha:1}, 100, createjs.Ease.linear).wait(200)
+        .to({alpha:0.5}, 100, createjs.Ease.linear).wait(200)
+        .to({alpha:1}, 100, createjs.Ease.linear).wait(200)
+        .to({alpha:0.5}, 100, createjs.Ease.linear).wait(200)
+        .to({alpha:1}, 100, createjs.Ease.linear).wait(200).call(function(){
+        wrongBin.alpha = 0; //stupid workaround, should be fixed
+    });
+}
+function nextLevel (){
+    gameRunning = false;
+    stage.removeAllChildren();
+    garbage = [];
+    bin = [];
 
-function nextLevel (){}
+    gratsText = new createjs.Text("Congratulations, you completed level " + "!", "30px monospace", "#fff");
+    gratsText.textBaseline = "middle";
+    gratsText.textAlign = "center";
+    gratsText.x = stage.canvas.width/2;
+    gratsText.y = stage.canvas.height/2;
+    stage.addChild(gratsText);
 
-function onTick(e){
-    stage.update(e);
-    moveHero();
-    checkCollisions();
-    if (roundsComplete>1)  {
+    amount = 3 + level;
+    mistakes = 0;
+    roundsComplete=-1;
+
+    stage.addChild(background, sun, cloud1, cloud2, cloud3, windmill1, windmill2, windmill3, sound);
+    stage.addChild(hero);
+    level++;
+    nextLevel = new createjs.Bitmap(queue.getResult('nextLevel'));
+    stage.addChild(nextLevel);
+    nextLevel.addEventListener('click', startLevel);
+    stage.update();
+}
+function windmillRotate(){
+    if (roundsComplete>0)  {
         windmill1.rotation++;
+        blinkObject(windmill1);
+        moveCloud(cloud1, -400, 1500);
+    }
+    if (roundsComplete>1) {
+        windmill2.rotation++;
+        blinkObject(windmill2);
+        moveCloud(cloud2, 800, 900);
     }
     if (roundsComplete>2) {
-        windmill2.rotation++;
-    }
-    if (roundsComplete>3) {
         windmill3.rotation++;
+        blinkObject(windmill3);
+        moveCloud(cloud3, -400, 2000);
+        createjs.Sound.play("winSound");
+        if (cloud3.x == -400){
+            nextLevel();
+        }
     }
-    if (garbage == 0){
-        addGarbage();
+}
+function updateText(){
+    mistakesText.text = "Mistakes made: " + mistakes;
+    livesText.text = "Lives: " + lives;
+    levelText.text = "Current Level: " + level;
+}
+
+function gameOver(){
+    //createjs.Sound.play("loseSound");
+    //TryAgain code needs to be done
+}
+
+function onTick(e){
+    if (mistakes < 3 && lives > 0 && gameRunning) {
+        updateText();
+        stage.update(e);
+        moveHero();
+        checkCollisions();
+        windmillRotate();
+        wrongBin.y = hero.y - 25;
+        wrongBin.x = hero.x - 25;
+    } else {
+        if (done == true){
+            gameOver();
+            done=false;
+        }
+    }
+    if (mistakes > 2) {
+        gameOver();
+    }
+    if (gameRunning && garbage < amount){
         roundsComplete++;
+        console.log(roundsComplete);
+        if (roundsComplete < 3){
+            addGarbage();
+        }
+
     }
 }

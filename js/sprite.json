@@ -1,0 +1,12 @@
+{
+    "framerate": 20,
+    "images": ["img/hero_sprite.png"],
+    "frames": {"width":64, "height":64, "regX":0, "regY":0},
+    "animations": {
+        "down": [0,3],
+        "left": [4,7],
+        "right": [8, 11],
+        "up": [12, 15],
+        "standRight": [11]
+    }
+}
