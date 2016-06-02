@@ -196,8 +196,8 @@ function startLevel (){
         //instructions for each level needed
 
         if (level > 1) {
-            nextLevel.removeEventListener('click', startLevel);
-            stage.removeChild(nextLevel, congratsText);
+            levelNext.removeEventListener('click', startLevel);
+            stage.removeChild(levelNext, gratsText);
             hero.x = 20;
             hero.y = 400;
             cloud1.x = 200;
@@ -510,18 +510,17 @@ function nextLevel (){
     gratsText.textAlign = "center";
     gratsText.x = stage.canvas.width/2;
     gratsText.y = stage.canvas.height/2;
-    stage.addChild(gratsText);
 
     amount = 3 + level;
     mistakes = 0;
     roundsComplete=-1;
 
     stage.addChild(background, sun, cloud1, cloud2, cloud3, windmill1, windmill2, windmill3, sound);
-    stage.addChild(hero);
+    stage.addChild(gratsText);
     level++;
-    nextLevel = new createjs.Bitmap(queue.getResult('nextLevel'));
-    stage.addChild(nextLevel);
-    nextLevel.addEventListener('click', startLevel);
+    levelNext = new createjs.Bitmap(queue.getResult('nextLevel'));
+    stage.addChild(levelNext);
+    levelNext.addEventListener('click', startLevel);
     stage.update();
 }
 function windmillRotate(){
