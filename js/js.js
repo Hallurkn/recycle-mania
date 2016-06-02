@@ -503,6 +503,7 @@ function nextLevel (){
     stage.removeAllChildren();
     garbage = [];
     bin = [];
+    createjs.Sound.play("winSound");
 
     gratsText = new createjs.Text("Congratulations, you completed level " + "!", "30px monospace", "#fff");
     gratsText.textBaseline = "middle";
@@ -538,7 +539,6 @@ function windmillRotate(){
         windmill3.rotation++;
         blinkObject(windmill3);
         moveCloud(cloud3, -400, 2000);
-        createjs.Sound.play("winSound");
         if (cloud3.x == -400){
             nextLevel();
         }
