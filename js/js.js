@@ -16,6 +16,7 @@ var clicked = false;
 var level = 1;
 var gameRunning = false;
 var done=true;
+var random;
 
 //var speedPowerUp = false; For future use
 
@@ -221,6 +222,11 @@ function startLevel (){
 
         wrongBin = new createjs.Text("WRONG BIN, +1 MISTAKE", "15px monospace", "#f00");
 
+
+        if (level > 1) {
+            bin.push(createBin('compostBin', 'compost', 53, 68, 430, 260));
+        }
+
         stage.addChild(hero);
 
         createjs.Ticker.setFPS(60);
@@ -272,11 +278,10 @@ function addGarbage() {
         compost.type = "compost";
         compost.touching = false;
 
-        var random = Math.floor(Math.random()*2);
+        random = Math.floor(Math.random()*2);
 
-        if (level > 1) {
-            bin.push(createBin('compostBin', 'compost', 53, 68, 430, 260));
-            random = Math.floor(Math.random()*3);
+        if (level > 1 ) {
+            random = Math.floor(Math.random() * 3);
         }
 
         switch (random) {
@@ -505,7 +510,7 @@ function nextLevel (){
     bin = [];
     createjs.Sound.play("winSound");
 
-    gratsText = new createjs.Text("Congratulations, you completed level " + "!", "30px monospace", "#fff");
+    gratsText = new createjs.Text("Congratulations, you completed level " + level + "!", "30px monospace", "#fff");
     gratsText.textBaseline = "middle";
     gratsText.textAlign = "center";
     gratsText.x = stage.canvas.width/2;
