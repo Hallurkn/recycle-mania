@@ -3,7 +3,6 @@
  */
 var stage, hero, background, windmill1, windmill2, windmill3, cloud1, cloud2, cloud3, sun, splash, firstSplash, congratsText;
 var sound;
-var nextLevel;
 var queue, preloadText;
 var bin = [];
 var garbage = [];
@@ -207,6 +206,9 @@ function startLevel (){
             cloud2.y = 20;
             cloud3.x = 20;
             cloud3.y = 20;
+            windmill1.rotation = 0;
+            windmill2.rotation = 0;
+            windmill3.rotation = 0;
         }
 
         bin.push(createBin('paperBin', 'paper', 53, 68, 600, 450));
