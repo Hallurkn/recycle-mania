@@ -63,7 +63,7 @@ function preload(){
     ])
 }
 function loading (e){
-    console.log(e.progress);
+    //console.log(e.progress);
     preloadText.text = Math.round(e.progress*100) + "%";
     stage.update();
 }
@@ -450,7 +450,6 @@ function checkCollisions() {
         for(var i=0;i<bin.length;i++) {
             if (hitTest(hero, bin[i])) {
                 bin[i].touching = true;
-                console.log(bin[i].touching);
             } else {
                 bin[i].touching = false;
             }
@@ -469,7 +468,6 @@ function checkCollisions() {
                 stage.removeChild(hero.garbage);
                 hero.garbage=null;
                 pickup=false;
-                console.log("wrong bin");
                 stage.addChild(wrongBin);
                 blinkObject(wrongBin);
                 mistakes++;
@@ -581,7 +579,6 @@ function onTick(e){
     }
     if (gameRunning && garbage < amount){
         roundsComplete++;
-        console.log(roundsComplete);
         if (roundsComplete < 3){
             addGarbage();
         }
