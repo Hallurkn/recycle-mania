@@ -3,25 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <title>Recycler</title>
+    <link rel="stylesheet" type="text/css" href="sweetalert-master/dist/sweetalert.css">
     <script src="js/createjs-2015.11.26.min.js"></script>
+    <script src="sweetalert-master/dist/sweetalert.min.js"></script>
     <script src="js/js.js"></script>
     <style>
 
+        body {
+            background-color:blue;
+        }
+
         canvas {
-            background-color: #66c1ff;
+            background-color: #000;
+            transition: 2s all;
+        }
+
+        #second {
+            background-color:#fff;
         }
 
         .wrapper {
             text-align:center;
         }
 
+        .changeColor {
+            background-color: #bce0ff;
+            transition: 2s all;
+        }
+
     </style>
 </head>
 <body onload="preload()">
 <div class="wrapper">
-    <canvas id="canvas" height="500" width="700"></canvas>
-    <h2><a href="report.pdf">Link to report</a></h2>
-    <h2><a href="https://github.com/Hallurkn/Environmental-Game">Link to repository</a></h2>
+    <canvas id="canvas" height="550" width="850"></canvas><canvas id="second" height="550" width="200"></canvas>
 </div>
 
 </body>

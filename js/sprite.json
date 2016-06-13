@@ -1,5 +1,5 @@
 {
-    "framerate": 20,
+    "framerate": 10,
     "images": ["img/hero_sprite.png"],
     "frames": {"width":64, "height":64, "regX":0, "regY":0},
     "animations": {

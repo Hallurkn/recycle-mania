@@ -1,0 +1,8 @@
+{
+    "framerate": 10,
+    "images": ["img/grandma.png"],
+    "frames": {"width":90, "height":107, "regX":0, "regY":0},
+    "animations": {
+        "clean": [0, 1]
+    }
+}
