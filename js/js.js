@@ -131,7 +131,7 @@ function preload(){
         {id:"loseSound", src:"sound/lose.mp3"},
         {id:"wrongSound", src:"sound/wrong.wav"},
         {id:"paperSound", src:"sound/garbage.wav"},
-        {id:"parkSound", src:"sound/troll.mp3"},
+        {id:"backgroundSound", src:"sound/troll.mp3"},
         {id:"bossSound", src:"sound/ufo.mp3"},
         {id:"bossLaugh", src:"sound/bossLaugh.mp3"},
         {id:"grandmaSound", src:"sound/grandma.wav"}
@@ -226,7 +226,7 @@ function restartGame(){
     powerup.phone=false;
     powerup.defyPhysics=false;
     powerup.shoes=0;
-    powerup.medicine=15;
+    powerup.medicine=14;
 
     settings.amount=3;
     settings.money=0;
@@ -369,7 +369,7 @@ function setupLevel(){
         assets.windmill1, assets.windmill2, assets.windmill3);
 
     // Initial splash screen
-    createjs.Sound.stop("parkSound");
+    createjs.Sound.stop("backgroundSound");
     splashScreen = new createjs.Bitmap(queue.getResult("splashPage"));
     splashScreen.y = -1050;
     continueButton = new createjs.Bitmap(queue.getResult("continueButton"));
@@ -398,18 +398,15 @@ function startLevel () {
     stage.removeChild(splashScreen, continueButton);
     if (!booleans.stageMoved) {
         animateStage();
-    } else {
-        keepGoingBoss();
     }
-    createjs.Sound.play("parkSound", {loop:-1});
+    createjs.Sound.play("backgroundSound", {loop:-1});
 
     //Workaraound for testing
     /*booleans.levelDone=true;
     stage.y = 0;
     booleans.stageMoved=true;
     assets.boss.x = stage.canvas.width - assets.boss.width/2;
-    assets.boss.y = 0;
-    keepGoingBoss();*/
+    assets.boss.y = 0;*/
 
     if (booleans.stageMoved){
         booleans.levelDone=true; //Workaround for the updateText function to display a certain text at "sorted right".
@@ -525,7 +522,6 @@ function animateBoss(){
         .to({y:-400, x: stage.canvas.width, rotation:900}, 2400,  createjs.circInOut)
         .to({y:0, x: stage.canvas.width/2, rotation:1800}, 2400, createjs.circInOut).call(function(){
         assets.boss.regX=assets.boss.width/2;
-        keepGoingBoss();
     })
 }
 //Boss animation that is part of the gameplay
@@ -579,146 +575,9 @@ function animateGrandma(){
     });
 }
 
-//Introduces new elements in the levels with alerts.
-function levelIntro() {
-    stage.removeChild(shopMenu);
-    continueButton.removeEventListener('click', levelIntro);
-    assets.boss.x = stage.canvas.width - assets.boss.width/2;
-    assets.boss.y = 0;
-    if (settings.level == 1){
-        createjs.Sound.play("message");
-        booleans.gameRunning = false;
-        swal({
-            title: "Get ready",
-            text: "Garbage will fall from the sky.. ",
-            showConfirmButton: true
-        },function(){
-            booleans.gameRunning=true;
-            startLevel();
-            keepGoingBoss();
-        });
-    }
-    if (settings.level == 2) {
-        createjs.Sound.play("message");
-        booleans.gameRunning = false;
-        swal({
-            title: "Level " + settings.level + "!",
-            text: "In order to pass for the next level you need " + settings.completeNeeded +"% sorted right! You can do it!",
-            showConfirmButton: true,
-            confirmButtonText: "Accept",
-            type: "success",
-            closeOnConfirm: false
-        }, function () {
-            createjs.Sound.play("message");
-            swal({
-                title: "New bin!",
-                text: "Beware of the new bin! It will only accept banana peels..",
-                showConfirmButton: true,
-                confirmButtonColor: "#0F0",
-                confirmButtonText: "Got it!",
-                imageUrl: "img/red_bin.png"
-            }, function () {
-                booleans.gameRunning = true;
-                startLevel();
-                keepGoingBoss();
-            });
-        });
-
-    }
-    if (settings.level == 3) {
-        createjs.Sound.play("message");
-        booleans.gameRunning = false;
-        swal({
-            title: "Level " + settings.level + "!",
-            text: "In order to pass for the next level you need " + settings.completeNeeded +"% sorted right! You can do it!",
-            showConfirmButton: true,
-            confirmButtonText: "Accept",
-            type: "success",
-            closeOnConfirm: false
-        }, function () {
-            createjs.Sound.play("message");
-            swal({
-                title: "New Bin!",
-                text: "Beware of the new bin! It will only take battaries..",
-                imageUrl: "img/yellow_bin.png",
-                showConfirmButton: true,
-                confirmButtonText: "Accept",
-                closeOnConfirm: false
-            }, function () {
-                createjs.Sound.play("message");
-                swal({
-                    title: "Traffic's coming!",
-                    text: "Be careful when you pass the street. Cars will start driving. Be cautious when you hear a car, cause you might get hit and " +
-                    "severely injure yourself..",
-                    imageUrl: "img/carBody.png",
-                    confirmButtonColor: "#0F0",
-                    confirmButtonText: "Got it!",
-                    showConfirmButton: true
-                }, function () {
-                    booleans.gameRunning = true;
-                    startLevel();
-                    keepGoingBoss();
-                });
-            });
-        });
-    }
-    if (settings.level == 4){
-        createjs.Sound.play("message");
-        booleans.gameRunning = false;
-        swal({
-            title: "Level " + settings.level + "! The Final One!",
-            text: "Good job, you have done a great job cleaning the city, and you now face your ultimate challenge...",
-            imageUrl: "img/success.png",
-            showConfirmButton: true,
-            confirmButtonText: "Accept",
-            closeOnConfirm: false
-        }, function () {
-            createjs.Sound.play("message");
-            swal({
-                title: "Pollutus is furious!",
-                text: "Your recycling sent Pollutus into a furious rage, and he's littering like a madman! Recycle the garbage he " +
-                "throws in order to defeat him!",
-                imageUrl: "img/boss.png",
-                showConfirmButton: true,
-                confirmButtonColor: "#0F0",
-                confirmButtonText: "Let's do it!"
-            }, function () {
-                booleans.gameRunning = true;
-                startLevel();
-                keepGoingBoss();
-            });
-        });
-    }
-}
-
 //Unused function - Can be used later on for a more complex boss level
 function bossLevel(){
 
-}
-
-//Checks if powerups are active and adds them to the asset
-function checkPowerUp (){
-    if (powerup.defyPhysics){
-        physicsAsset.alpha=1;
-    } else {
-        physicsAsset.alpha=0.2;
-    }
-    if (powerup.phone){
-        phoneAsset.alpha=1;
-    } else {
-        phoneAsset.alpha=0.2;
-    }
-    if (powerup.medicine>14){
-        medicineAsset.alpha=1;
-    } else {
-        medicineAsset.alpha=0.2;
-    }
-    if (powerup.shoes>0){
-        shoesAsset.alpha=1;
-    } else {
-        shoesAsset.alpha=0.2;
-    }
-    infoCanvas.update();
 }
 
 //Hero movement
@@ -726,9 +585,6 @@ function moveHero(){
     function fingerUp(e){
         if(e.keyCode===67){
             keys.ckd=false;
-        }
-        if(e.keyCode===16){
-            keys.shiftkd=false;
         }
         if(e.keyCode===32){
             keys.spacekd=false;
@@ -753,9 +609,6 @@ function moveHero(){
     function fingerDown(e){
         if(e.keyCode===67){
             keys.ckd=true;
-        }
-        if(e.keyCode===16){
-            keys.shiftkd=true;
         }
         if(e.keyCode===32){
             keys.spacekd=true;
@@ -854,7 +707,6 @@ function moveHero(){
             assets.hero.garbage.x = assets.hero.x+20;
         }
     }
-
 
     // Not move out of right side of Canvas
     if (assets.hero.x-assets.hero.width/2 > stage.canvas.width && powerup.defyPhysics) {
@@ -1143,6 +995,31 @@ function updateText(){
     infoCanvas.update();
 }
 
+//Checks if powerups are active and adds them to the asset
+function checkPowerUp (){
+    if (powerup.defyPhysics){
+        physicsAsset.alpha=1;
+    } else {
+        physicsAsset.alpha=0.2;
+    }
+    if (powerup.phone){
+        phoneAsset.alpha=1;
+    } else {
+        phoneAsset.alpha=0.2;
+    }
+    if (powerup.medicine>14){
+        medicineAsset.alpha=1;
+    } else {
+        medicineAsset.alpha=0.2;
+    }
+    if (powerup.shoes>0){
+        shoesAsset.alpha=1;
+    } else {
+        shoesAsset.alpha=0.2;
+    }
+    infoCanvas.update();
+}
+
 //Enters and sets up the shop.
 function enterShop (){
     shopMenu = new createjs.Container();
@@ -1302,10 +1179,121 @@ function enterShop (){
     stage.addChild(shopMenu);
     stage.update();
 }
+//Introduces new elements in the levels with alerts.
+function levelIntro() {
+    stage.removeChild(shopMenu);
+    continueButton.removeEventListener('click', levelIntro);
+    assets.boss.x = stage.canvas.width - assets.boss.width/2;
+    assets.boss.y = 0;
+    if (settings.level == 1){
+        createjs.Sound.play("message");
+        booleans.gameRunning = false;
+        swal({
+            title: "Get ready",
+            text: "Garbage will fall from the sky.. ",
+            showConfirmButton: true
+        },function(){
+            booleans.gameRunning=true;
+            startLevel();
+            keepGoingBoss();
+        });
+    }
+    if (settings.level == 2) {
+        createjs.Sound.play("message");
+        booleans.gameRunning = false;
+        swal({
+            title: "Level " + settings.level + "!",
+            text: "In order to pass for the next level you need " + settings.completeNeeded +"% sorted right! You can do it!",
+            showConfirmButton: true,
+            confirmButtonText: "Accept",
+            type: "success",
+            closeOnConfirm: false
+        }, function () {
+            createjs.Sound.play("message");
+            swal({
+                title: "New bin!",
+                text: "Beware of the new bin! It will only accept banana peels..",
+                showConfirmButton: true,
+                confirmButtonColor: "#0F0",
+                confirmButtonText: "Got it!",
+                imageUrl: "img/red_bin.png"
+            }, function () {
+                booleans.gameRunning = true;
+                startLevel();
+                keepGoingBoss();
+            });
+        });
+
+    }
+    if (settings.level == 3) {
+        createjs.Sound.play("message");
+        booleans.gameRunning = false;
+        swal({
+            title: "Level " + settings.level + "!",
+            text: "In order to pass for the next level you need " + settings.completeNeeded +"% sorted right! You can do it!",
+            showConfirmButton: true,
+            confirmButtonText: "Accept",
+            type: "success",
+            closeOnConfirm: false
+        }, function () {
+            createjs.Sound.play("message");
+            swal({
+                title: "New Bin!",
+                text: "Beware of the new bin! It will only take battaries..",
+                imageUrl: "img/yellow_bin.png",
+                showConfirmButton: true,
+                confirmButtonText: "Accept",
+                closeOnConfirm: false
+            }, function () {
+                createjs.Sound.play("message");
+                swal({
+                    title: "Traffic's coming!",
+                    text: "Be careful when you pass the street. Cars will start driving. Be cautious when you hear a car, cause you might get hit and " +
+                    "severely injure yourself..",
+                    imageUrl: "img/carBody.png",
+                    confirmButtonColor: "#0F0",
+                    confirmButtonText: "Got it!",
+                    showConfirmButton: true
+                }, function () {
+                    booleans.gameRunning = true;
+                    startLevel();
+                    keepGoingBoss();
+                });
+            });
+        });
+    }
+    if (settings.level == 4){
+        createjs.Sound.play("message");
+        booleans.gameRunning = false;
+        swal({
+            title: "Level " + settings.level + "! The Final One!",
+            text: "Good job, you have done a great job cleaning the city, and you now face your ultimate challenge...",
+            imageUrl: "img/success.png",
+            showConfirmButton: true,
+            confirmButtonText: "Accept",
+            closeOnConfirm: false
+        }, function () {
+            createjs.Sound.play("message");
+            swal({
+                title: "Pollutus is furious!",
+                text: "Your recycling sent Pollutus into a furious rage, and he's littering like a madman! Recycle the garbage he " +
+                "throws in order to defeat him!",
+                imageUrl: "img/boss.png",
+                showConfirmButton: true,
+                confirmButtonColor: "#0F0",
+                confirmButtonText: "Let's do it!"
+            }, function () {
+                booleans.gameRunning = true;
+                startLevel();
+                keepGoingBoss();
+            });
+        });
+    }
+}
 
 //Finishs a level when 3 rounds are done. Prints end level text if it's completed or not. Resets values for new level.
 function levelDone () {
-    createjs.Sound.stop("parkSound");
+    createjs.Sound.stop("backgroundSound");
     booleans.gameRunning = false;
     booleans.levelDone=true;
     booleans.pickup=false;
